@@ -45,19 +45,12 @@ class FollowSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate_data(self, value):
+    def validate_following(self, value):
         if value == self.context['request'].user:
-            raise serializers.ValidationError(
-                        'Нельзя подписаться на себя'
-                    )
-        return value
-
-    def validate(self, data):
-        if self.context['request'].user == data['following']:
             raise serializers.ValidationError(
                 'Нельзя подписаться на себя'
             )
-        return data
+        return value
 
 
 class GroupSerializer(serializers.ModelSerializer):
