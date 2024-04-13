@@ -1,6 +1,6 @@
+from rest_framework import serializers
 from posts.models import (Comment, Follow,
                           Group, Post, User)
-from rest_framework import serializers
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -17,11 +17,9 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
-    post = serializers.ReadOnlyField(
-        read_only=True, source='post.pk'
-    )
 
     class Meta:
+        read_only_fields = ['post']
         fields = '__all__'
         model = Comment
 
@@ -46,6 +44,13 @@ class FollowSerializer(serializers.ModelSerializer):
                 fields=('user', 'following'),
             )
         ]
+
+    def validate_data(self, value):
+        if value == self.context['request'].user:
+            raise serializers.ValidationError(
+                        'Нельзя подписаться на себя'
+                    )
+        return value
 
     def validate(self, data):
         if self.context['request'].user == data['following']:
